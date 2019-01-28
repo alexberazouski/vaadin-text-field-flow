@@ -15,11 +15,15 @@
  */
 package com.vaadin.flow.component.textfield.tests;
 
+import com.vaadin.flow.component.textfield.testbench.TextFieldElement;
+import com.vaadin.testbench.TestBenchTestCase;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
+import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.interactions.Actions;
 
 import com.vaadin.flow.component.textfield.TextField;
@@ -30,77 +34,25 @@ import com.vaadin.flow.testutil.TestPath;
  * Integration tests for {@link TextField}.
  */
 @TestPath("text-field-test")
-public class TextFieldPageIT extends AbstractComponentIT {
+public class TextFieldPageIT extends TestBenchTestCase {
 
     @Before
     public void init() {
-        open();
+        setDriver(new FirefoxDriver());
+        getDriver().get("http://localhost:9998/text-field-test");
     }
 
     @Test
-    public void assertReadOnly() {
-        WebElement webComponent = findElement(By.tagName("vaadin-text-field"));
+    public void checkSendKeys() {
+        TextFieldElement tf = $(TextFieldElement.class).first();
 
-        Assert.assertNull(webComponent.getAttribute("readonly"));
+        //Works in FF and Edge
+        tf.$("input").attribute("slot", "input").first()
+                .sendKeys(Keys.ENTER);
 
-        WebElement button = findElement(By.id("read-only"));
-        button.click();
-
-        waitUntil(
-                driver -> "true".equals(getProperty(webComponent, "readonly")));
-
-        button.click();
-
-        waitUntil(driver -> "false"
-                .equals(getProperty(webComponent, "readonly")));
+        // Doesn't work
+        tf.sendKeys(Keys.ENTER);
     }
 
-    @Test
-    public void assertRequired() {
-        WebElement webComponent = findElement(By.tagName("vaadin-text-field"));
 
-        Assert.assertNull(webComponent.getAttribute("required"));
-
-        WebElement button = findElement(By.id("required"));
-        button.click();
-        waitUntil(
-                driver -> "true".equals(getProperty(webComponent, "required")));
-
-        button.click();
-        waitUntil(driver -> "false"
-                .equals(getProperty(webComponent, "required")));
-    }
-
-    @Test
-    public void assertValueWithoutListener() {
-        WebElement field = findElement(By.id("value-change"));
-
-        WebElement input = getInShadowRoot(field, By.cssSelector("input"));
-        input.sendKeys("foo");
-        blur();
-
-        WebElement button = findElement(By.id("get-value"));
-        new Actions(getDriver())
-                .moveToElement(button, button.getSize().getWidth() / 2,
-                        button.getSize().getHeight() / 2)
-                .click().build().perform();
-
-        String value = findElement(By.className("text-field-value")).getText();
-        Assert.assertEquals("foo", value);
-    }
-
-    @Test
-    public void assertClearValue() {
-       WebElement field = findElement(By.id("clear-text-field"));
-
-       WebElement input = getInShadowRoot(field, By.cssSelector("input"));
-       input.sendKeys("foo");
-       blur();
-
-       WebElement clearButton = getInShadowRoot(field, By.cssSelector("[part~='clear-button']"));
-       clearButton.click();
-
-       String value = findElement(By.id("clear-message")).getText();
-       Assert.assertEquals("Old value: 'foo'. New value: ''.", value);
-    }
 }

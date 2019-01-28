@@ -19,6 +19,7 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.router.Route;
 
 /**
@@ -37,6 +38,9 @@ public class TextFieldPage extends Div {
     private void initView() {
         Div message = new Div();
         TextField textField = new TextField();
+        Element input = new Element("input");
+        input.setAttribute("slot", "input");
+        textField.getElement().appendChild(input);
         textField.addValueChangeListener(event -> message
                 .setText(String.format("Old value: '%s'. New value: '%s'.",
                         event.getOldValue(), event.getValue())));
